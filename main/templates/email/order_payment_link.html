@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Your Exclusive Order Payment Link - Luxury Bone Carving</title>
+</head>
+<body style="font-family: 'Playfair Display', Georgia, serif; color: #1c1917; background-color: #0c0a09; padding: 30px 10px; margin: 0;">
+  <div style="max-width: 620px; margin: auto; background: #171513; border: 1px solid #d4af37; border-top: 5px solid #d4af37; padding: 40px 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); color: #f5f5f4;">
+    
+    <!-- Header / Brand -->
+    <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 25px;">
+      <h1 style="color: #d4af37; letter-spacing: 3px; font-size: 26px; text-transform: uppercase; margin: 0 0 8px 0; font-weight: 400;">Luxury Bone Carving</h1>
+      <p style="font-size: 13px; color: #a8a29e; letter-spacing: 2px; text-transform: uppercase; margin: 0;">Artisanal Heritage & Bespoke Craft</p>
+    </div>
+
+    <!-- Main Notice & 24h Expiry Banner -->
+    <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 4px; padding: 20px; margin-bottom: 30px; text-align: center;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #d4af37; font-weight: 600; margin-bottom: 6px;">Reservation Window Active</div>
+      <div style="font-size: 20px; color: #ffffff; margin-bottom: 8px;">Order Reference: <strong>{{ order.order_number }}</strong></div>
+      <p style="margin: 0; font-size: 14px; color: #e7e5e4; line-height: 1.5;">
+        Your artisanal piece has been reserved exclusively for you. To secure craftsmanship and worldwide insured dispatch, please complete payment within the next <strong>24 hours</strong>.
+      </p>
+    </div>
+
+    <!-- Greeting -->
+    <p style="font-size: 16px; color: #f5f5f4; line-height: 1.6;">Dear {{ order.customer_name }},</p>
+    <p style="font-size: 14px; color: #d6d3d1; line-height: 1.6;">
+      Thank you for your valued order. Our master artisans have reviewed your request. Below is your curated order summary:
+    </p>
+
+    <!-- Itemized List -->
+    <table style="width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 14px;">
+      <thead>
+        <tr style="border-bottom: 1px solid rgba(212, 175, 55, 0.3); color: #d4af37; text-align: left;">
+          <th style="padding: 10px 0; font-weight: 400; letter-spacing: 1px;">Item</th>
+          <th style="padding: 10px 0; text-align: center; font-weight: 400;">Qty</th>
+          <th style="padding: 10px 0; text-align: right; font-weight: 400;">Amount ({{ order.currency }})</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); color: #e7e5e4;">
+          <td style="padding: 12px 0;">
+            <strong style="color: #ffffff;">{{ item.product_title }}</strong>
+            {% if item.sku %}<br><span style="font-size: 12px; color: #a8a29e;">SKU: {{ item.sku }}</span>{% endif %}
+          </td>
+          <td style="padding: 12px 0; text-align: center;">{{ item.quantity }}</td>
+          <td style="padding: 12px 0; text-align: right;">{{ order.currency }} {{ item.total_price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="color: #d6d3d1;">
+          <td colspan="2" style="padding-top: 15px; text-align: right; font-size: 13px;">Subtotal:</td>
+          <td style="padding-top: 15px; text-align: right; font-size: 13px;">{{ order.currency }} {{ order.subtotal_amount }}</td>
+        </tr>
+        <tr style="color: #d6d3d1;">
+          <td colspan="2" style="padding-top: 5px; text-align: right; font-size: 13px;">Worldwide Insured Shipping:</td>
+          <td style="padding-top: 5px; text-align: right; font-size: 13px;">
+            {% if order.shipping_amount > 0 %}
+              {{ order.currency }} {{ order.shipping_amount }}
+            {% else %}
+              Complimentary
+            {% endif %}
+          </td>
+        </tr>
+        <tr style="color: #ffffff; font-size: 17px; font-weight: bold; border-top: 1px solid rgba(212, 175, 55, 0.4);">
+          <td colspan="2" style="padding: 15px 0; text-align: right; color: #d4af37;">Total:</td>
+          <td style="padding: 15px 0; text-align: right; color: #d4af37;">{{ order.currency }} {{ order.total_amount }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Call to action button -->
+    <div style="text-align: center; margin: 35px 0;">
+      <a href="{{ payment_url }}" target="_blank" style="background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%); color: #000000; text-decoration: none; padding: 16px 36px; border-radius: 2px; font-weight: bold; font-size: 15px; letter-spacing: 1.5px; text-transform: uppercase; display: inline-block; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.35);">
+        Complete Secure Payment &rarr;
+      </a>
+      <p style="font-size: 12px; color: #a8a29e; margin-top: 12px;">
+        Payment link expires on: <strong style="color: #f5f5f4;">{{ order.payment_link_expires_at|date:"F j, Y, P e" }}</strong>
+      </p>
+    </div>
+
+    <!-- Direct URL fallback -->
+    <p style="font-size: 12px; color: #78716c; line-height: 1.5; word-break: break-all;">
+      Or copy and paste this link in your browser:<br>
+      <a href="{{ payment_url }}" style="color: #d4af37;">{{ payment_url }}</a>
+    </p>
+
+    <!-- Ethical guarantee footer -->
+    <hr style="border: 0; border-top: 1px solid rgba(212, 175, 55, 0.2); margin: 30px 0 20px 0;">
+    <div style="font-size: 12px; color: #a8a29e; text-align: center; line-height: 1.6;">
+      <p style="margin: 0 0 5px 0; color: #d4af37; font-weight: 500;">Ethically Sourced Bovine & Camel Bone &bull; 100% CITES Exempt &bull; Global Insured Courier</p>
+      <p style="margin: 0;">For bespoke queries, reply directly or reach our concierge at concierge@luxurybonecarving.com</p>
+    </div>
+
+  </div>
+</body>
+</html>

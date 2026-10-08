@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-left: 4px solid #b8963a;">
+        <h2 style="color: #b8963a;">New Inquiry #{{ inquiry.id }}</h2>
+        <p><strong>Customer:</strong> {{ inquiry.customer_name }}</p>
+        <p><strong>Email:</strong> {{ inquiry.email }}</p>
+        <p><strong>Phone:</strong> {{ inquiry.phone|default:"Not provided" }}</p>
+        <p><strong>Country:</strong> {{ inquiry.country }}</p>
+        <p><strong>Product:</strong> {{ inquiry.product.title|default:"Not specified" }}</p>
+        <p><strong>Quantity:</strong> {{ inquiry.quantity }}</p>
+        <p><strong>Requirements:</strong> {{ inquiry.requirements|linebreaks }}</p>
+        <p><a href="{{ admin_url }}core/inquiry/{{ inquiry.id }}/change/">View in Admin</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Luxury Bone Carving Dashboard</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0;">
+    <div style="background: #f5f3f0; padding: 20px; border-left: 5px solid #b8963a; flex: 1 1 200px;">
+        <h3>Products</h3>
+        <p style="font-size: 32px; font-weight: 300;">{{ total_products }}</p>
+        <small>Active: {{ active_products }}</small>
+    </div>
+    <div style="background: #f5f3f0; padding: 20px; border-left: 5px solid #b8963a; flex: 1 1 200px;">
+        <h3>Inquiries</h3>
+        <p style="font-size: 32px; font-weight: 300;">{{ total_inquiries }}</p>
+        <small>New: {{ new_inquiries }}</small>
+    </div>
+    <div style="background: #f5f3f0; padding: 20px; border-left: 5px solid #b8963a; flex: 1 1 200px;">
+        <h3>Categories</h3>
+        <p style="font-size: 32px; font-weight: 300;">{{ total_categories }}</p>
+    </div>
+    <div style="background: #f5f3f0; padding: 20px; border-left: 5px solid #b8963a; flex: 1 1 200px;">
+        <h3>Collections</h3>
+        <p style="font-size: 32px; font-weight: 300;">{{ total_collections }}</p>
+    </div>
+</div>
+
+<h2>Recent Inquiries</h2>
+<table style="width:100%; border-collapse: collapse; background: #fff;">
+    <thead><tr style="background: #e8e0d8;"><th>Customer</th><th>Product</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for inq in recent_inquiries %}
+    <tr style="border-bottom: 1px solid #ddd;">
+        <td>{{ inq.customer_name }}</td>
+        <td>{{ inq.product.title|default:"—" }}</td>
+        <td>{{ inq.get_status_display }}</td>
+        <td>{{ inq.created_at|date:"Y-m-d H:i" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No inquiries yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2>Top Products by Inquiries</h2>
+<ol>
+    {% for product in top_products %}
+    <li>{{ product.title }} – {{ product.inquiry_count }} inquiries</li>
+    {% empty %}
+    <li>No data</li>
+    {% endfor %}
+</ol>
+{% endblock %}
