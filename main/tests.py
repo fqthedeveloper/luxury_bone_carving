@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
 from rest_framework.test import APIClient
-from .models import Order, OrderItem, Product, UserProfile, Inquiry
+from .models import Order, OrderItem, Product, UserProfile, Inquiry, CurrencyRate
 
 
 class OrderAndAuthTestCase(TestCase):
@@ -270,3 +270,121 @@ class OrderAndAuthTestCase(TestCase):
         res = self.client.post('/api/inquiries/', inquiry_payload, format='json')
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.data['customer_name'], 'Baroness Rothschild')
+
+
+class SecurityAndPermissionsTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.customer = User.objects.create_user(
+            username='regular@example.com',
+            email='regular@example.com',
+            password='Password123!'
+        )
+        self.staff_user = User.objects.create_user(
+            username='admin@luxurybonecarving.com',
+            email='admin@luxurybonecarving.com',
+            password='StaffSecretPassword123!',
+            is_staff=True,
+            is_superuser=True
+        )
+
+    def test_anonymous_user_blocked_from_admin_stats(self):
+        """Verify unauthenticated user cannot access admin stats (401/403)."""
+        res = self.client.get('/api/admin/stats/')
+        self.assertIn(res.status_code, [401, 403])
+
+    def test_non_staff_user_blocked_from_admin_stats(self):
+        """Verify non-staff authenticated customer is forbidden from admin stats (403)."""
+        self.client.force_authenticate(user=self.customer)
+        res = self.client.get('/api/admin/stats/')
+        self.assertEqual(res.status_code, 403)
+
+    def test_non_staff_user_blocked_from_admin_orders(self):
+        """Verify non-staff authenticated customer cannot access admin orders list (403)."""
+        self.client.force_authenticate(user=self.customer)
+        res = self.client.get('/api/admin/orders/')
+        self.assertEqual(res.status_code, 403)
+
+    def test_staff_user_allowed_to_admin_stats(self):
+        """Verify authenticated staff/superuser gets 200 OK on admin stats."""
+        self.client.force_authenticate(user=self.staff_user)
+        res = self.client.get('/api/admin/stats/')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('total_products', res.data)
+        self.assertIn('total_orders', res.data)
+
+
+class CatalogAndReviewTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.product = Product.objects.create(
+            title='Royal Chess Set',
+            slug='royal-chess-set',
+            description='Handcrafted bovine bone chess pieces with intricate filigree.',
+            price_inr=Decimal('75000.00'),
+            price_usd=Decimal('900.00'),
+            sku='LBC-CHESS-001',
+            is_active=True,
+            is_featured=True
+        )
+
+    def test_featured_products_list(self):
+        """Verify featured products endpoint returns active featured items."""
+        res = self.client.get('/api/products/featured/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(len(res.data) > 0)
+        self.assertEqual(res.data[0]['slug'], 'royal-chess-set')
+
+    def test_product_detail_case_insensitive_slug(self):
+        """Verify fetching product by slug is robust and case-insensitive."""
+        res = self.client.get(f'/api/products/ROYAL-CHESS-SET/')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['sku'], 'LBC-CHESS-001')
+
+    def test_product_view_recording(self):
+        """Verify recording product views increments view count."""
+        initial_views = self.product.views_count
+        res = self.client.post(f'/api/products/{self.product.slug}/view/')
+        self.assertEqual(res.status_code, 200)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.views_count, initial_views + 1)
+
+    def test_site_banner_retrieval(self):
+        """Verify active site banner endpoint returns configured hero banner."""
+        res = self.client.get('/api/site-banners/')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('title', res.data)
+
+
+class TranslationAndForexTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_translate_proxy_identity(self):
+        """Verify translate proxy returns identical text when target matches source."""
+        res = self.client.post('/api/translate/', {
+            'q': 'Handcrafted Heritage',
+            'target': 'en',
+            'source': 'en'
+        }, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data.get('translatedText'), 'Handcrafted Heritage')
+
+    def test_translate_proxy_empty(self):
+        """Verify translate proxy handles blank input safely without errors."""
+        res = self.client.post('/api/translate/', {
+            'q': '',
+            'target': 'fr'
+        }, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data.get('translatedText'), '')
+
+    def test_currency_rates_list(self):
+        """Verify currency-rates endpoint responds with currency rates list."""
+        CurrencyRate.objects.get_or_create(currency_code='USD', defaults={'rate_to_usd': Decimal('1.0000')})
+        CurrencyRate.objects.get_or_create(currency_code='EUR', defaults={'rate_to_usd': Decimal('0.9200')})
+        res = self.client.get('/api/currency-rates/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(isinstance(res.data, list))
+        codes = [c['currency_code'] for c in res.data]
+        self.assertIn('USD', codes)
