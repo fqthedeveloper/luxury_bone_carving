@@ -309,9 +309,14 @@ class CreateOrderSerializer(serializers.Serializer):
             )
 
         # Generate payment link and send luxury 24-hour email
-        payment_url = f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000').rstrip('/')}/pay/{order.payment_token}"
+        lang = (self.context.get('lang', 'en') if hasattr(self, 'context') and self.context else 'en') or 'en'
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000').rstrip('/')
+        if lang and lang != 'en':
+            payment_url = f"{frontend_url}/{lang}/pay/{order.payment_token}"
+        else:
+            payment_url = f"{frontend_url}/pay/{order.payment_token}"
         from .email_utils import send_order_payment_link_email
-        send_order_payment_link_email(order, payment_url)
+        send_order_payment_link_email(order, payment_url, lang=lang)
 
         return order
 

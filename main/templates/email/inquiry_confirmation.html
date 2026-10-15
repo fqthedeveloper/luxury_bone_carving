@@ -4,13 +4,13 @@
 <body style="font-family: Georgia, serif; color: #333; background-color: #f9f5f0; padding: 20px;">
     <div style="max-width: 600px; margin: auto; background: #fff; padding: 40px; border: 1px solid #d4c5a9; border-top: 6px solid #b8963a;">
         <h1 style="color: #b8963a; font-weight: 300; text-align: center;">Luxury Bone Carving</h1>
-        <p style="font-size: 18px; text-align: center;">Thank you for your inquiry</p>
-        <p>Dear {{ inquiry.customer_name }},</p>
-        <p>We have received your inquiry regarding <strong>{{ inquiry.product.title }}</strong> (Ref: #{{ inquiry.id }}).</p>
-        <p>Our team will review your request and get back to you within 24 hours.</p>
-        <p>If you need immediate assistance, please contact us at <a href="mailto:info@luxurybonecarving.com">info@luxurybonecarving.com</a>.</p>
+        <p style="font-size: 18px; text-align: center;">{{ i18n.inquiry_thank_you|default:"Thank you for your inquiry" }}</p>
+        <p>{{ i18n.dear|default:"Dear" }} {{ inquiry.customer_name }},</p>
+        <p>{{ i18n.inquiry_received|default:"We have received your inquiry regarding" }} <strong>{{ inquiry.product.title }}</strong> (Ref: #{{ inquiry.id }}).</p>
+        <p>{{ i18n.inquiry_review_msg|default:"Our team will review your request and get back to you within 24 hours." }}</p>
+        <p>{{ i18n.inquiry_help|default:"If you need immediate assistance, please contact us at" }} <a href="mailto:info@luxurybonecarving.com">info@luxurybonecarving.com</a>.</p>
         <hr style="border: 1px solid #d4c5a9;">
-        <p style="font-size: 14px; color: #777;">This is an automated message. Please do not reply directly to this email.</p>
+        <p style="font-size: 14px; color: #777;">{{ i18n.auto_msg|default:"This is an automated message. Please do not reply directly to this email." }}</p>
     </div>
 </body>
 </html>

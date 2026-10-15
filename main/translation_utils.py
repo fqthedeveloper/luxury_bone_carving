@@ -55,14 +55,14 @@ def translate_text(text, target_lang, source_lang='en'):
     except Exception as e:
         pass
 
-    # Provider 3: MyMemory API
+    # Provider 3: MyMemory API (with valid de email for 10k words daily quota)
     try:
-        mm_url = f"https://api.mymemory.translated.net/get?q={encoded_text}&langpair={source_lang}|{target_lang}"
+        mm_url = f"https://api.mymemory.translated.net/get?q={encoded_text}&langpair={source_lang}|{target_lang}&de=concierge@luxurybonecarving.com"
         res = requests.get(mm_url, headers=headers, timeout=5)
         if res.status_code == 200:
             data = res.json()
             tr = data.get('responseData', {}).get('translatedText')
-            if tr and tr.strip() and tr.strip().lower() != text.strip().lower():
+            if tr and tr.strip() and not tr.startswith('MYMEMORY WARNING') and tr.strip().lower() != text.strip().lower():
                 return tr
     except Exception as e:
         pass

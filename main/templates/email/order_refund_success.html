@@ -9,37 +9,37 @@
     
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 25px;">
       <h1 style="color: #d4af37; letter-spacing: 3px; font-size: 26px; text-transform: uppercase; margin: 0 0 8px 0; font-weight: 400;">Luxury Bone Carving</h1>
-      <p style="font-size: 13px; color: #a8a29e; letter-spacing: 2px; text-transform: uppercase; margin: 0;">Artisanal Heritage & Bespoke Craft</p>
+      <p style="font-size: 13px; color: #a8a29e; letter-spacing: 2px; text-transform: uppercase; margin: 0;">{{ i18n.brand_subtitle|default:"Artisanal Heritage & Bespoke Craft" }}</p>
     </div>
 
     <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 4px; padding: 20px; margin-bottom: 25px; text-align: center;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #4ade80; font-weight: 600; margin-bottom: 6px;">Refund Processed</div>
-      <div style="font-size: 22px; color: #ffffff; margin-bottom: 8px;">Order #<strong>{{ order.order_number }}</strong></div>
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #4ade80; font-weight: 600; margin-bottom: 6px;">{{ i18n.refund_processed|default:"Refund Processed" }}</div>
+      <div style="font-size: 22px; color: #ffffff; margin-bottom: 8px;">{{ i18n.order_ref|default:"Order" }} #<strong>{{ order.order_number }}</strong></div>
       <p style="margin: 0; font-size: 14px; color: #e7e5e4; line-height: 1.5;">
-        Dear {{ order.customer_name }}, your refund of <strong>{{ order.currency }} {{ order.refund_amount|default:order.total_amount }}</strong> has been initiated and credited back to your original payment account.
+        {{ i18n.dear|default:"Dear" }} {{ order.customer_name }}, {{ i18n.refund_credited_msg|default:"your refund has been initiated and credited back to your original payment account." }} ({{ order.currency }} {{ order.refund_amount|default:order.total_amount }})
       </p>
     </div>
 
     <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 18px; margin: 25px 0; border-radius: 4px;">
-      <h4 style="color: #d4af37; margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Refund Transaction Details</h4>
+      <h4 style="color: #d4af37; margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">{{ i18n.refund_details|default:"Refund Transaction Details" }}</h4>
       <p style="margin: 0 0 8px 0; font-size: 14px; color: #d6d3d1;">
-        <strong>Refund Reference ID:</strong> <span style="font-family: monospace; color: #4ade80;">{{ order.refund_id }}</span>
+        <strong>{{ i18n.refund_ref_id|default:"Refund Reference ID" }}:</strong> <span style="font-family: monospace; color: #4ade80;">{{ order.refund_id }}</span>
       </p>
       <p style="margin: 0 0 8px 0; font-size: 14px; color: #d6d3d1;">
-        <strong>Refunded Amount:</strong> {{ order.currency }} {{ order.refund_amount|default:order.total_amount }}
+        <strong>{{ i18n.refunded_amount|default:"Refunded Amount" }}:</strong> {{ order.currency }} {{ order.refund_amount|default:order.total_amount }}
       </p>
-      <p style="margin: 0; font-size: 14px; color: #d6d3d1;">
-        <strong>Settlement Destination:</strong> Original payment source (Card / UPI / Bank Account / Wallet)
+      <p style="margin: 0 0 8px 0; font-size: 14px; color: #d6d3d1;">
+        <strong>{{ i18n.settlement_dest|default:"Settlement Destination" }}:</strong> {{ i18n.settlement_note|default:"Original payment source (Card / UPI / Bank Account / Wallet)" }}
       </p>
     </div>
 
     <p style="font-size: 14px; color: #d6d3d1; line-height: 1.6;">
-      Depending on your banking institution or card issuer, the credited balance typically reflects on your statement within 5 to 7 business days (instant for UPI / wallets). If you have any questions, our concierge team is always here for you.
+      {{ i18n.refund_timeline|default:"Depending on your banking institution or card issuer, the credited balance typically reflects on your statement within 5 to 7 business days (instant for UPI / wallets). If you have any questions, our concierge team is always here for you." }}
     </p>
 
     <hr style="border: 0; border-top: 1px solid rgba(212, 175, 55, 0.2); margin: 30px 0 20px 0;">
     <div style="font-size: 12px; color: #a8a29e; text-align: center; line-height: 1.6;">
-      <p style="margin: 0 0 5px 0; color: #d4af37; font-weight: 500;">Concierge Support &bull; worldwide.support@luxurybonecarving.com</p>
+      <p style="margin: 0 0 5px 0; color: #d4af37; font-weight: 500;">{{ i18n.concierge_support|default:"Concierge Support • worldwide.support@luxurybonecarving.com" }}</p>
     </div>
 
   </div>

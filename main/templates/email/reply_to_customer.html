@@ -4,12 +4,12 @@
 <body style="font-family: Georgia, serif; color: #333; background-color: #f9f5f0; padding: 20px;">
     <div style="max-width: 600px; margin: auto; background: #fff; padding: 40px; border: 1px solid #d4c5a9; border-top: 6px solid #b8963a;">
         <h1 style="color: #b8963a; font-weight: 300; text-align: center;">Luxury Bone Carving</h1>
-        <p>Dear {{ inquiry.customer_name }},</p>
-        <p>Thank you for your inquiry (#{{ inquiry.id }}). Our team has responded:</p>
+        <p>{{ i18n.dear|default:"Dear" }} {{ inquiry.customer_name }},</p>
+        <p>{{ i18n.inquiry_team_responded|default:"Thank you for your inquiry. Our team has responded:" }} (Ref: #{{ inquiry.id }})</p>
         <div style="background: #f9f5f0; padding: 15px; border-left: 3px solid #b8963a; margin: 15px 0;">
             {{ reply.message|linebreaks }}
         </div>
-        <p>If you have further questions, please reply to this email.</p>
+        <p>{{ i18n.further_questions|default:"If you have further questions, please reply to this email." }}</p>
         <hr style="border: 1px solid #d4c5a9;">
         <p style="font-size: 14px; color: #777;">Luxury Bone Carving – where art meets heritage.</p>
     </div>

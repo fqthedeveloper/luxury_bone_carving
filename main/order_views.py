@@ -26,7 +26,8 @@ class CreateOrderView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        serializer = CreateOrderSerializer(data=request.data, context={'user': request.user})
+        lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
+        serializer = CreateOrderSerializer(data=request.data, context={'user': request.user, 'lang': lang})
         if serializer.is_valid():
             order = serializer.save()
             order_data = OrderSerializer(order).data
@@ -218,7 +219,8 @@ class VerifyPaymentView(APIView):
         order.save(update_fields=['status', 'payment_gateway', 'gateway_payment_id', 'updated_at'])
 
         # Send confirmation email
-        send_order_payment_success_email(order)
+        lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
+        send_order_payment_success_email(order, lang=lang)
 
         return Response({
             'success': True,
@@ -247,7 +249,8 @@ class EmailOTPRequestLoginView(APIView):
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
         otp = profile.generate_otp()
-        send_otp_email(user, otp)
+        lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
+        send_otp_email(user, otp, lang=lang)
 
         return Response({
             'success': True,
@@ -420,8 +423,9 @@ class CustomerCancelRequestView(APIView):
         order.cancellation_requested_at = timezone.now()
         order.save(update_fields=['status', 'cancellation_reason', 'cancellation_requested_at', 'updated_at'])
 
+        lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
         try:
-            send_cancellation_request_email(order)
+            send_cancellation_request_email(order, lang=lang)
         except Exception as e:
             print(f"Cancellation email dispatch error: {e}")
 

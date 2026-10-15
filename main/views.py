@@ -61,7 +61,8 @@ class ResendOTPView(APIView):
             if profile.is_email_verified:
                 return Response({'detail': 'Email already verified.'}, status=status.HTTP_400_BAD_REQUEST)
             otp = profile.generate_otp()
-            send_otp_email(user, otp)
+            lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
+            send_otp_email(user, otp, lang=lang)
             return Response({'detail': 'OTP resent successfully.'}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
