@@ -1,7 +1,7 @@
 import uuid
 from decimal import Decimal
 from django.utils.text import slugify
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from django.conf import settings
 from rest_framework import status, permissions
 from rest_framework.views import APIView
@@ -287,7 +287,7 @@ class AdminProductImageUploadView(APIView):
         if request.data.get('set_primary'):
             img_id = request.data.get('image_id')
             if img_id:
-                Image.objects.filter(product=product).exclude(id=img_id).update(sort_order=models.F('sort_order') + 1)
+                Image.objects.filter(product=product).exclude(id=img_id).update(sort_order=F('sort_order') + 1)
                 Image.objects.filter(product=product, id=img_id).update(sort_order=0)
                 return Response({'success': True, 'message': 'Primary cover image set.'}, status=status.HTTP_200_OK)
 
@@ -554,8 +554,8 @@ class AdminOrderResendLinkView(APIView):
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000').rstrip('/')
-        payment_url = f"{frontend_url}/pay/{order.payment_token}"
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://testing-born-carving.netlify.app').rstrip('/')
+        payment_url = f"{frontend_url}/en/pay/{order.payment_token}/"
         
         try:
             send_order_payment_link_email(order, payment_url)

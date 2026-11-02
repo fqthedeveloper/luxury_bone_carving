@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
 from rest_framework.test import APIClient
-from .models import Order, OrderItem, Product, UserProfile, Inquiry, CurrencyRate
+from .models import Order, OrderItem, Product, Image, UserProfile, Inquiry, CurrencyRate
 
 
 class OrderAndAuthTestCase(TestCase):
@@ -388,3 +388,53 @@ class TranslationAndForexTestCase(TestCase):
         self.assertTrue(isinstance(res.data, list))
         codes = [c['currency_code'] for c in res.data]
         self.assertIn('USD', codes)
+
+    def test_admin_set_primary_cover_image(self):
+        """Verify admin cover image set_primary action updates sort_order without F expression NameError."""
+        staff_user = User.objects.create_user(
+            username='staff_img@luxurybonecarving.com',
+            email='staff_img@luxurybonecarving.com',
+            password='StaffSecretPassword123!',
+            is_staff=True,
+            is_superuser=True
+        )
+        product = Product.objects.create(
+            title='Carved Ivory-Tone Box',
+            slug='carved-ivory-tone-box',
+            description='Heirloom box',
+            price_inr=Decimal('20000.00'),
+            price_usd=Decimal('250.00'),
+            sku='LBC-IMG-001',
+            is_active=True
+        )
+        img1 = Image.objects.create(product=product, images='products/images/a.jpg', sort_order=0)
+        img2 = Image.objects.create(product=product, images='products/images/b.jpg', sort_order=1)
+
+        self.client.force_authenticate(user=staff_user)
+        res = self.client.patch(
+            f'/api/admin/products/{product.id}/upload-image/',
+            {'set_primary': True, 'image_id': img2.id},
+            format='json'
+        )
+        self.assertEqual(res.status_code, 200)
+        img1.refresh_from_db()
+        img2.refresh_from_db()
+        self.assertEqual(img2.sort_order, 0)
+        self.assertGreater(img1.sort_order, 0)
+
+    def test_order_payment_url_includes_locale(self):
+        """Verify OrderSerializer.payment_url always includes locale prefix /en/pay/<token>/."""
+        order = Order.objects.create(
+            customer_name='Duchess of Devonshire',
+            email='duchess@example.com',
+            country='United Kingdom',
+            address_line1='Chatsworth House',
+            city='Bakewell',
+            postal_code='DE45 1PP',
+            currency='GBP',
+            total_amount=Decimal('620.00')
+        )
+        res = self.client.get(f'/api/orders/pay/{order.payment_token}/')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(f'/en/pay/{order.payment_token}/', res.data['payment_url'])
+

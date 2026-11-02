@@ -14,7 +14,7 @@ def dashboard(request):
         'total_collections': Collection.objects.count(),
         'recent_inquiries': Inquiry.objects.order_by('-created_at')[:10],
         'top_products': Product.objects.annotate(
-            inquiry_count=Count('inquiry')
+            inquiry_count=Count('inquiries')
         ).order_by('-inquiry_count')[:5],
     }
     return render(request, 'admin/main/dashboard.html', context)

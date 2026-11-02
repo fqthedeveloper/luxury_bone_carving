@@ -230,8 +230,9 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def get_payment_url(self, obj):
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000').rstrip('/')
-        return f"{frontend_url}/pay/{obj.payment_token}"
+        lang = (self.context.get('lang', 'en') if hasattr(self, 'context') and self.context else 'en') or 'en'
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://testing-born-carving.netlify.app').rstrip('/')
+        return f"{frontend_url}/{lang}/pay/{obj.payment_token}/"
 
 
 class CreateOrderItemInputSerializer(serializers.Serializer):
@@ -310,11 +311,8 @@ class CreateOrderSerializer(serializers.Serializer):
 
         # Generate payment link and send luxury 24-hour email
         lang = (self.context.get('lang', 'en') if hasattr(self, 'context') and self.context else 'en') or 'en'
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000').rstrip('/')
-        if lang and lang != 'en':
-            payment_url = f"{frontend_url}/{lang}/pay/{order.payment_token}"
-        else:
-            payment_url = f"{frontend_url}/pay/{order.payment_token}"
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://testing-born-carving.netlify.app').rstrip('/')
+        payment_url = f"{frontend_url}/{lang}/pay/{order.payment_token}/"
         from .email_utils import send_order_payment_link_email
         send_order_payment_link_email(order, payment_url, lang=lang)
 
@@ -369,4 +367,3 @@ class SiteBannerSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.down_image.url)
             return obj.down_image.url
         return ''
-
