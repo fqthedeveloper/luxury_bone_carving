@@ -554,7 +554,8 @@ class AdminOrderResendLinkView(APIView):
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://testing-born-carving.netlify.app').rstrip('/')
+        from .email_utils import get_frontend_base_url
+        frontend_url = get_frontend_base_url(request)
         payment_url = f"{frontend_url}/en/pay/{order.payment_token}/"
         
         try:

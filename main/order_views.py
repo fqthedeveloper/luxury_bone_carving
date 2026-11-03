@@ -27,10 +27,10 @@ class CreateOrderView(APIView):
 
     def post(self, request):
         lang = request.data.get('language') or request.headers.get('Accept-Language', 'en').split(',')[0].strip()[:2].lower()
-        serializer = CreateOrderSerializer(data=request.data, context={'user': request.user, 'lang': lang})
+        serializer = CreateOrderSerializer(data=request.data, context={'user': request.user, 'lang': lang, 'request': request})
         if serializer.is_valid():
             order = serializer.save()
-            order_data = OrderSerializer(order).data
+            order_data = OrderSerializer(order, context={'request': request, 'lang': lang}).data
             return Response({
                 'success': True,
                 'message': 'Order created successfully. 24-hour payment link has been dispatched to your email.',
@@ -57,7 +57,7 @@ class OrderDetailByTokenView(APIView):
             order.status = 'expired'
             order.save(update_fields=['status', 'updated_at'])
 
-        data = OrderSerializer(order).data
+        data = OrderSerializer(order, context={'request': request}).data
         # Razorpay is the single worldwide payment gateway
         data['gateways_available'] = {
             'razorpay': {
@@ -132,7 +132,28 @@ class InitiatePaymentView(APIView):
                     rzp_order = client.order.create(data=order_payload)
                     razorpay_order_id = rzp_order.get('id')
                 except Exception as rzp_err:
-                    print(f"Razorpay live order error, falling back: {rzp_err}")
+                    print(f"Razorpay live order error ({currency}): {rzp_err}")
+                    # If foreign currency (USD/EUR) is rejected on Indian Razorpay test account,
+                    # convert to approximate INR for seamless testing
+                    if currency != 'INR':
+                        try:
+                            inr_subunits = int(float(order.total_amount) * 85 * 100)
+                            fallback_payload = {
+                                'amount': inr_subunits,
+                                'currency': 'INR',
+                                'receipt': f"rcpt_{order.order_number}",
+                                'notes': {
+                                    'order_id': order.id,
+                                    'order_number': order.order_number,
+                                    'original_currency': currency,
+                                }
+                            }
+                            rzp_order = client.order.create(data=fallback_payload)
+                            razorpay_order_id = rzp_order.get('id')
+                            amount_subunits = inr_subunits
+                            currency = 'INR'
+                        except Exception as fallback_err:
+                            print(f"Razorpay INR fallback note: {fallback_err}")
 
             if not razorpay_order_id:
                 razorpay_order_id = f"order_rzp_{uuid.uuid4().hex[:14]}"

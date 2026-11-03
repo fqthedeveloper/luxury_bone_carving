@@ -154,7 +154,8 @@ class OrderAdmin(admin.ModelAdmin):
 
     def resend_payment_link(self, request, queryset):
         count = 0
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://testing-born-carving.netlify.app').rstrip('/')
+        from .email_utils import get_frontend_base_url
+        frontend_url = get_frontend_base_url(request)
         for order in queryset:
             payment_url = f"{frontend_url}/en/pay/{order.payment_token}/"
             send_order_payment_link_email(order, payment_url)
